@@ -13,8 +13,12 @@ Before we do this however, I wanted to quickly mention some of the inspiration t
 Believe it or not, a source of inspiration for this system comes from video games like Minecraft and my most recent studies in Linear Algebra. For those who are not aware, Minecraft is a popular sandbox videogame that is so intricate and powerful that you can actually build a functioning [8-bit computer in game](https://www.minecraftforum.net/forums/minecraft-java-edition/redstone-discussion-and/redstone-creations/3043582-8-bit-computer-turing-complete). ***(Sidenote: This means you can in theory simulate anything from a calculator to Microsoft Word to even Minecraft within a computer designed in a Minecraft server!)*** I was inspired by the coordinate system in the game (As far as I know, it's one of the only games that has this feature to this extent), which every randomly generated world in Minecraft has, which allows users to always return to an exact location without fail (As long as you are not killed by mobs in the process).
 
 <p align="center">
-  <img src="https://github.com/Coordinate-based-Inventory-Management-System-/images/download.jpg" width="220" height="280">
+  <img src="https://github.com/Seungjoo-Steven-YOU/Coordinate-based-Inventory-Management-System-/blob/main/images/download.jpg" width="220" height="280">
 <p/>
 
 
 There's also linear algebra, which is one of the most interesting branches of intermediate Mathematics that I have been exposed to. It should be unsurprising that the three-dimensional coordinate system is inspired by a simple directional vector with the same number of components. A more advanced concept I thought about was bijection and polymorphism, which basically means that two spaces are 'equivalent' in a sense. As long as this system is designed in a correct way, I want the physical structure of the storage room to no longer matter, as the mapping of each product should be polymorphic to each space and should theoretically be able to map each unique product to each bin, no matter how many products there are and no matter the size or structure of storage. 
+
+<p align="center">
+  <img src="https://github.com/Seungjoo-Steven-YOU/Coordinate-based-Inventory-Management-System-/blob/main/images/shear.gif">
+<p/>
