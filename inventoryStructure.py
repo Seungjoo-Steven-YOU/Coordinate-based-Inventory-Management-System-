@@ -129,6 +129,83 @@ class NotBijectiveError(Exception):
     """"""
 
 
+class Node:
+    """Make a basic linked list"""
+    def __init__(self, cycle, tree):
+        self.cycle = cycle
+        self.tree = tree
+        self.next = None
+        self.overstock = None
+
+    def move_item(self, product_name: str) -> None:
+        """
+        1. Find if product_name is in self.sorted_list. If it is not,
+           raise a key error
+        2. Remove that item from the list.
+        3. Access the node and transition to the next tree.
+        4. Inject the item and re-shuffle the list
+
+        pre-condition: The product_name must be DIRECTLY applied to the tree of
+                       interest
+        Args:
+            product_name: str
+                The name of the product that is being moved.
+
+        Returns: None
+        """
+        if product_name not in self.tree.sorted_list:
+            raise ValueError
+        else:
+            self.tree.sorted_list.remove(product_name)
+            curr = self.tree.node.next
+            curr.tree.sorted_list.append(product_name)
+            curr.tree.sorted_list.sort()
+
+class LinkedCycle:
+    """I'm thinking we first make LinkedLists for all the possible connections
+    that are needed when an item can move front to back (potentially even
+    overstock). When you click the 'move' button, it should simply find the item
+    in the list that is saved in Node, delete that item, then move to the next
+    node, and add that item into the new list."""
+    def __init__(self, name: str, ATree, f_coord: str,
+                 b_coord: str) -> None:
+        """Pre-Condition: The ATree object must be the ROOT of the tree."""
+        # Build a directed cycle
+        self.name = name
+        self.tree = ATree
+        # Keep this as isolated to the trees as possible
+        front = ATree.subtrees[0]
+        back = ATree.subtrees[1]
+        # Start with the front room. The following are trees
+        front_find = front.hide_and_seek(f_coord)
+        back_find = back.hide_and_seek(b_coord)
+        # Create the nodes
+        front_node = Node(self, front_find)
+        back_node = Node(self, back_find)
+        # Connect the nodes
+        front_find.node = front_node
+        back_find.node = back_node
+        front_node.tree = front_find
+        back_node.tree = back_find
+
+        front_node.next = back_node
+        back_node.next = front_node
+
+
+    # def linkup(self, room, coordinate, node: Node) -> None:
+    #     """Link up the front or back (Specify using room) coordinate to the
+    #     correct nodes in the correct branch.
+    #     """
+    #     for subtree in room.subtrees:
+    #         actual_coord = subtree.coordinate
+    #         if actual_coord == coordinate:
+    #             subtree.node = node
+    #             node.tree = subtree
+    #         else:
+    #             self.linkup(subtree, coordinate, node)
+
+
+
 # Main bijective higher order helper function
 # curr in this case would be the current AtomicTree. An issue with the higher
 # order methods was that it would end up applying methods to the original self
@@ -331,8 +408,7 @@ class AtomicTree:
                  find=None,
                  main=False,
                  stable=True,
-                 parent=None | pd.DataFrame,
-                 ) -> None:
+                 parent=None | pd.DataFrame) -> None:
         self.coordinate = coordinate
         self._column = column
         self._dataframe = dataframe
@@ -344,9 +420,10 @@ class AtomicTree:
         self.parent = parent
         # Say True iff we want to use boolean_split
         self._find = find
-
         self._stable = stable
+        self.node = None
         self.sorted_list = []
+
 
     def __str__(self, level=0) -> str:
         """Return the tree structure of each of its subtrees."""
@@ -368,6 +445,18 @@ class AtomicTree:
         True
         """
         return self._dataframe.equals(other._dataframe)
+
+    def hide_and_seek(self, coordinate: str):
+        """Return an Atomic Tree that has a matching coordinate.
+        """
+        for subtree in self.subtrees:
+            if subtree.coordinate == coordinate:
+                return subtree
+            else:
+                result = subtree.hide_and_seek(coordinate)
+                if result is not None:
+                    return result
+        return None
 
     def _valid_nuke(self) -> bool:
         """Return True iff the sum of len(subtree._dataframes) == self._size."""
@@ -458,19 +547,19 @@ class AtomicTree:
             print("WHAT")
             raise LeftOverError
 
-    def _to_the_top(self):
-        """
-        Return the Main AtomicTree
-        # >>> atom = AtomicTree("***Main", "Rank", update_inventory, main=True)
-        # >>> atom.nuke(2, **first)
-        # >>> curr = atom.subtrees[0]
-        # >>> isinstance(curr._to_the_top(), AtomicTree)
-        # True
-        """
-        curr = self
-        while not curr.parent.main:
-            curr = curr.parent
-        return curr
+    # def _to_the_top(self):
+    #     """
+    #     Return the Main AtomicTree
+    #     # >>> atom = AtomicTree("***Main", "Rank", update_inventory, main=True)
+    #     # >>> atom.nuke(2, **first)
+    #     # >>> curr = atom.subtrees[0]
+    #     # >>> isinstance(curr._to_the_top(), AtomicTree)
+    #     # True
+    #     """
+    #     curr = self
+    #     while not curr.parent.main:
+    #         curr = curr.parent
+    #     return curr
 
     def traverse_and_apply(self, method) -> None | list[dict]:
         """Traverse the entire tree and apply class methods onto it. The two
@@ -499,7 +588,6 @@ class AtomicTree:
         IS THERE ANYWAY TO DO THIS RECURSIVELY???
         * It would make things way more scalable k thanks bye.
         """
-        result = {}
         temp = self.traverse_and_apply(dictionary_build)
         for i in range(1, len(temp)):
             update_dict(temp[0], temp[i])
@@ -562,10 +650,22 @@ if __name__ == "__main__":
     curr.nuke(2, **back_carts)
     curr = curr.subtrees[1]
     curr.nuke(2, **back_edibles)
-    print(atom)
     atom.traverse_and_apply(stable_deconstruct)
-    print(curr.parent.parent.parent.subtrees[0].sorted_list)
-    print(atom.bijection())
+    LinkedCycle("Flowers 3.5g ", atom, "1.2", "3.1")
+    # print(atom.subtrees[1].subtrees[2].subtrees[1].node)
+    curr = curr.parent.parent.parent.subtrees[1]
+    # print(curr.sorted_list)
+    # curr = atom.subtrees[1].subtrees[2].subtrees[1]
+    curr = atom.subtrees[0].subtrees[0].subtrees[0]
+    print(curr.sorted_list)
+    curr.node.move_item('Area 51 3.5g')
+    print(curr.sorted_list)
+    print(curr.node.next.tree.sorted_list)
+
+
+
+    # print(atom.bijection())
+
 
     # print(list(curr.subtrees[1]._dataframe["Category Code"].unique()))
 
